@@ -57,12 +57,26 @@
 ## Plan d'Action
 ### Etudes
  * Routage dynamique
+
  * Protocole dynamique (RIP, OSPF, IGRP, EIGRP)
+
  * Métriques utilisés pour évaluer les routes
+
  * Théorie des graphes :
+ Un graphe est constitué de sommets et d'arrêtes reliant les sommets entre eux, les rendant adjacent. Les arêtes peuvent également former des **boucles** en partant d'un somment pour y retourner.  
+ Si les arêtes n'ont pas d'orientation, le graphe est dit non orienté. A contrario, si les arêtes ont un sens, le graphe est dit orienté.  
+ L'ordre d'un graphe, cela correspond à son nombre de sommets.  
+ Le degré d'un sommet, cela correspond au nombre d'arrete dont il est l'extrémité. (**Attention**, dans les boucles, le sommet est l'extrémité du départ de la boucle et de son arrivé, son degré augmente donc de deux et non pas d'un)  
+ Pour qu'un graphe soit dit "**complet**" : Si c'est un graphe non orienté, chaque couple de sommets doit être relié par **une** arête unique et ne pas contenir de boucle. Si c'est un graphe orienté, tous les sommets doivent être adjacents et il ne doit pas y avoir de boucle.
+ Un sous graphe c'est un sous ensemble de sommet ainsi que les arêtes les reliants (y compris les boucles)
+ ![Base des graphes](imgFantou/graphe_base.png)
+
   * Algorithme destribué à l'état de lien
+
   * Dijkstra
+
  * Implémentation des protocoles chez Cisco
+
  * Distances administratives
 
 ### Réalisation
