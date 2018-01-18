@@ -74,12 +74,11 @@
  
 ## 1 - Routage dynamique RIP
 
-**1 - Protocole à vecteur de distance :**
+RIP est un protocole qui permet de router dynamiquement son réseau, c'est à dire faire transiter les informations de routages à travers les routeurs. Il utilise un protocole à vecteur de distance.
 
-- Ces protocoles sont sensibles aux boucles de routages
-- Dans ce type de protocole, aucun routeur ne remplit de fonction particulière.
-- Ils convergent lentement (se propage lentement vers le même point)
-- On citera **RIP** et **IGRP** comme étant représentatifs. **EIGRP** est aussi un protocole à vecteur de distance optimisé par cisco, qui ne présente pas tout les désavantages cités ci-dessus. 
+On retrouve **RIP** et **IGRP** comme étant représentatifs. 
+
+**EIGRP** est aussi un protocole à vecteur de distance optimisé par cisco, qui présente moins de désavantages.
 
 
 **Qu'est ce que le RIP ? :**
@@ -98,9 +97,9 @@ Il est disponible en trois versions :
 
 **Métrique RIP**
 
-RIP utilise l'algorithme de Bellman Fort pour calculelr les meilleures routes.
+RIP utilise l'algorithme de Bellman Fort pour calculer les meilleures routes.
 - La distance administrative de RIP est de 120 par défaut
-- La métrique est basée sur le nombre de sauts
+- La métrique est basée sur le nombre de sauts (Un saut = nombre de routeurs à parcourir)
 - La métrique base maximale est 15
 - La métrique infinie est 16 : Empoisonne une route.
 
@@ -112,8 +111,9 @@ Dans cet exemple, chacun ajoute une distance de +1 , et donc la métrique s'impl
 
 **Boucle de routage**
 
-Une boucle de routage est une route pour que les paquets n'arrivent jamais à leur destination, sont répétés sur le même noeud du réseau.
-Un routeur éloigné fait croire à des routeurs (bien informés d'une route modifiée) qu'il dispose d'une nouvelle route (à coût plus élevé) vers ce réseau.
+Une boucle de routage est une route pour que les paquets **n'arrivent jamais à leur destination**, sont **répétés** sur le même noeud du réseau. Ce phénomène est dû à une convergence lente des informations de routage.
+
+*Un routeur éloigné fait croire à des routeurs (bien informés d'une route modifiée) qu'il dispose d'une nouvelle route (à coût plus élevé) vers ce réseau.*
 
 Solutions aux boucles de routages :
 - Définir un nombre maximum de saut (15 max) ou métrique infinie (16)
@@ -121,6 +121,61 @@ Solutions aux boucles de routages :
 - Split horizon : Split horizon empêche à un routeur d'envoyer des informations (de métrique plus élevée) à travers l'interface de laquelle elle a pris l'information.
 - Triggered Update : Une MAJ est envoyé immédiatement plutôt qu'avant l'expiration du compteur lorsqu'une route est tombée, à l'aide de la métrique infinie. Tout les routeurs seront alors immédiatement avertis.
 - Split Horizon avec Poison Reverse ; Le protocole de routage avertit de toutes les routes sortant d'une interface mais celles qui ont été apprises d'une mise à jour plus récente venant dans cette interface sont marquées d'une métrique de distance infinie.
+
+**Timer RIP**
+
+- **Update** : délai de MAJ = 30s par défaut.
+- **Invalid** : Si pas d'annonce pendant un certain délai -> Marquée d'une métrique infinie, 180s par défaut.
+- **Flush :** délai après lequel une route est retirée de la table de routage (240s par défaut, toujours > Invalid)
+- **Holddown :** Délai d'attente après lequel une **route à métrique plus élevée** est prise en compte : 180s par défaut.
+
+**Compteur de retenue**
+
+Cdr ou HDW (Hold Down Timer) est crée par Cisco.
+
+Après avoir retenu qu'une route vers un réseau est tombée, il y a une période avant de "croire" n'importe quelle autre information de routage à propos de ce réseau. Il faut la réinscrire par un routeur voisin qui a appris sa réinscription.
+
+
+**Bilan des temps sur un routeur, utilisés par RIP**
+
+![](https://cisco.goffinet.org/content/images/2017/09/compteurs_rip.png)
+
+**Les limites de RIP** 
+- Sa limite de 15 pour les sauts, inutilisable sur les réseau plus grand
+- VLSM est préférable à RIPv1 en vue de ces manque d'@ IP et de sa flexibilité
+- Consomme une grande quantité de bande passante pour envoyer les tables de routages en entier
+- Convergence assez lente où le besoin est haut
+- RIP ne prend pas en compte les délai et les coups, c'est uniquement le nombre de sauts, quelque soit la bande passante.
+- Pas de concept de "zone" ou de "frontières", pas de "classless", ni d'utilisation intelligente de "l'agrégation" ni de la summarization des routes.
+- RIP est sensible aux boucles de routages
+
+**Positif**
+- Facile à déployer, léger
+- RIPv2 supporte le VLSM et permet l'authentification et les MAJ routages mutlicast
+
+
+### Comment mettre en place le RIP
+
+https://cisco.goffinet.org/routage-dynamique-ripv2/
+
+- 1 : Configurer les interface Gigabit vers les autres routeurs avec une IP et les activer 
+- 2 : Compléments de  configuration
+	- ip dhcp pool [NomLan]
+	- network @ip masque
+	- default-router [sa propre @IP]
+
+- 3 :  Configurer RIP 
+	- router rip: Accéder au mode de config de RIP
+	- version 2
+	- network [sa propre @IP] : Fait de la pub & annonces pour segments réseau concernés, active la capacité des interfaces à envoyer des MAJ.
+	- passive-interface [Interface relié à la LAN] : Désactive l'envoi de messages de routages, l'interfac epeut toujours en accepter de manière crédule.
+
+**Vérifier sa config**
+
+show ip protocols
+debug ip rip -> lance les logs RIP dans la console par défaut
+show ip route
+ping / traceroute / tracert
 
 
 
