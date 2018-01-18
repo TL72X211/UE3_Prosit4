@@ -1,72 +1,28 @@
-# UE3_Prosit4 - Graphes et algorithmes de routage
+Boot d’un routeur
 
-## Team
- * Animateur - Nicolas
- * Secrétaire - Hugo
- * Scribe - Fantou
- * Gestionnaire - Maxou
+POST (power on self test) il teste le matériel en gros
+il lit la valeur du registre(confreg)
+3a) si 0x???0 il démare en mode rom
 
-## Mots-Clés
- * Congestion : 
- * Algorithme de Dijkstra : 
- * Routage Dynamique : 
- * Théorie des graphs : 
- * Algorithme distribué (à état de lien) : 
- * Protocole RIP : 
- * Protocole Propriétaire : 
- * Protocole Ouvert : 
- * Algorithme de type vercteur de distance : 
- * Matrice : 
- * Authentification : 
- * Coût : 
- * Nombre de saut : 
- * Arretes et sommets : 
+3b) si 0x???1 il démarre en mode rommon
 
-## Contexte
-### Quoi ?
- * Problème de congestion
+3c) si 0x???2 -> 0x???F il va lire la flash(4) 4a) il trouve ios valide, il le charge
+4b) il trouve pas d’ios ou invalide, il entre en mode rommon 5a) il vérifie le 7ème bit du registre si 1 il passe le fichier de config (qui se trouve dans la NVRAM)
+5b)si 7ème bit=0 il charge le fichier de config(startup-config) qui se trouve dans la NVRAM
+6a)il trouve le fichier de config, il le charge
+6b)il ne le trouve pas, il entre dans le setup configuration mode
+Principe de routage Le routage IP repose sur quatre principes que nous passons en revue très brièvement : Premier principe : des adresses IP bien structurée Chaque interface réseau d’une machine possède une adresse unique dans tout son réseau. Cette adresse est structurée en deux parties :
 
-### Pourquoi ?
- * Eviter les problèmes de congestion
- * Fluidifier le trafic
-
-### Comment ?
- * Calculer le chemin le plus court
-
-## Contraintes
- * Matériel constructeur **Cisco**
-
-## Problématique
- * Comment éviter les problèmes de congestion et fluidifier le trafic réseau via la théorie des graphes ?
-
-## Généralisation
- * ~~MCO~~
- * Optimisation
-
-## Hypothèses
- * Le chemin le plus court va réduire les congestions
- * Les différents protocoles disponibles utilisent chacun un moyen différent pour identifier la meilleur route
- * Chemin avec la plus grande bande passante
- * Différents critères pour le chemin le plus adapté
- * On peut utiliser plusieurs chemin pour un même **paquet**
- * On peut utiliser plusieurs chemin pour un même **segment**
- * Un routeur utilise les distances administratives pour sélectionner la route à utiliser
- * Parcours en profondeur
- * Dijkstra fait la sommes des poids des arretes et continu à avancer d'arrete en arrete tant que le poids des arretes parcourues est inférieure au poids total des poids des arretes précédentes
-
-## Plan d'Action
-### Etudes
- * Routage dynamique
- * Protocole dynamique (RIP, OSPF, IGRP, EIGRP)
- * Métriques utilisés pour évaluer les routes
- * Théorie des graphes :
-  * Algorithme destribué à l'état de lien
-  * Dijkstra
- * Implémentation des protocoles chez Cisco
- * Distances administratives
-
-### Réalisation
- * Matrice pour trouver le meilleur chemin
- * Workshop
- * Corbeille (*Avec Kim*)
- * *Facultatif : Dijkstra en Java*
+la première partie que l’on appelle aussi préfixe donne le numéro du réseau.
+la deuxième partie donne le numéro de l’interface dans ce réseau. Les adresses IP sont regroupées par classe de réseau.
+On définit des masques de réseau (en général un masque par classe de réseau). A partir de l’adresse IP d’une interface dans un réseau et du masque de réseau (ou de la classe de réseau), on détermine l’adresse du dit réseau (le préfixe) en procédant à un ET logique entre l’adresse de l’interface et le masque. Ainsi par exemple pour une interface eth0 d’adresse 192.168.2.254 (une adresse de classe C) et un masque réseau 255.255.255.0, on obtient le préfixe réseau 192.168.2.0 Deuxième principe : Les paquets comportent les adresses IP des machines émettrice et destinataire Lors de l’émission, le protocole découpe les données en plus petits paquets (aussi appelés datagrammes IP). Ces paquets comportent une en-tête et une zone de données comme on peut le voir ci-dessous EN-TETE ZONE DE DONNEES L’en-tête contient, entre autres, les adresses de l’émetteur et du destinataire et permet l’aiguillage du paquet de proche en proche jusqu’à sa destination. Troisième principe : Chaque machine du réseau possède une table de routage gérée par le logiciel IP C’est une liste contenant les adresses de réseau destination et les interfaces ou adresses des machines proches par lesquelles on peut atteindre ces destinations. Nous donnons ci-dessous un exemple d’une telle table. Réseau Moyens de l’atteindre 192.168.2.0 eth0 100.0.0.0 eth1 101.0.0.0 eth2 192.168.1.0 100.0.0.1 192.168.3.0 101.0.0.2 Explications : La machine qui a cette table de routage possède trois interfaces réseau (eth0, eth1 et eth2) ainsi que les adresses IP des réseaux qui sont directement reliés à ces interfaces. On connaît les adresses IP de deux routeurs. On sait aussi qu’il existe deux réseaux atteignables depuis notre machine (192.168.1.0 et 192.168.3.0) et qu’ils sont derrière les routeurs 100.0.0.1 et 101.0.0.2 respectivement. Quatrième principe : Toutes les machines sous IP exécutent le même algorithme Lors de l’émission d’un paquet de données, l’algorithme exécuté est le suivant : Calculer le préfixe réseau de l’adresse destination avec notre masque ; Rechercher ce préfixe dans notre table de routage ; Quatre possibilités existent :
+Le préfixe calculé correspond à celui d’un réseau directement connecté : il y a remise directe du paquet sur le réseau et le routage est terminé ;
+Ce préfixe correspond à celui d’un réseau accessible via un routeur : on récupère l’adresse IP de ce routeur et on lui transmet le paquet.
+Ce préfixe n’a pas de correspondance dans la table, mais il existe un routeur par défaut dans la table : on transmet le paquet au routeur par défaut ;
+Si aucun des cas précédents n’est rencontré, on déclare une erreur de routage. Routage inter VLAN a première étape à suivre une fois que le cablage est en place est de créer les deux VLANS sur nos deux switchs. Pour faire simple, nous allons supposer que nous aurons deux VLANS (10 et 20) avec une liaison par port trunk entre le switch 2 et le switch 3. Le reste de la configuration sera détaillée et expliquée plus tard.
+Switch>enable Switch#conf t Nous allons ensuite créer les VLANS et les nommer : Switch(config)#vlan 10
+Switch(config-vlan)#name vlan_10
+Switch(config-vlan)#vlan 20 Switch(config-vlan)#name vlan_20 Switch(config-vlan)#vlan 99 Switch(config-vlan)#name Native Switch(config-vlan)#exit Nous créons également un VLAN natif dont l’explication sera faite un peu plus bas dans le tutoriel. Nous allons maintenant créer nos ports trunk sur les interfaces Fa0/1 de nos deux switchs. Le port trunk va permettre, au travers des trames 802.1q de faire transiter des trames tagguées (ou étiquetées) selon un Vlan ou un autre afin que tous les Vlan autorisés puissent passer au travers d’un même lien. Plus clairement, c’est un port qui peut faire passer plusieurs VLAN vers un autre élément actif. Cela permet, dans notre cas, de faire communiquer les VLANS 10 et 20 entres des éléments connectés à deux switchs différents. Sans port trunk, il faudrait une liaison entre les switchs par VLANs. Switch(config)#interface fa0/1 Switch(config-if)#switchport mode trunk
+Switch(config-if)#switchport trunk allowed vlan 20,30,99 Switch(config-if)# switchport trunk native vlan 99 Switch(config-if)#no shutdown Switch(config-if)#exit Faisons un petit point sur le terme "native vlan"sur ce lien : vlan natif On spécifie également les VLANS que nous souhaitons laisser passer sur notre trunk à savoir les trames étiquetées sur les VLAN 20,30 et 99. Par défaut, toutes les VLANS peuvent passer sur un port trunk. Si nous spécifions l’autorisation de certaines VLANs, les aurtres ne seront pas acceptés à transiter. Nous allons maintenant affecter les ports voulus à nos différentes VLANS. On présume que nous souhaitons affecter les ports Fa0/10 des deux switchs sur la VLAN 20 et les ports Fa0/11 sur le VLAN 30, on exécute donc ces commandes sur nos deux switchs : Switch(config)#interface fa0/10 Switch(config-if)#switchport access vlan 20
+Switch(config-if)#no shutdown Switch(config-if)#exit Switch(config)#interface fa0/11 Switch(config-if)#switchport access vlan 30
+Switch(config-if)#no shutdown Switch(config-if)#exit
