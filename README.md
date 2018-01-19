@@ -72,9 +72,9 @@
  * Corbeille (*Avec Kim*)
  * *Facultatif : Dijkstra en Java*
  
-## 1 - Routage dynamique RIP
+## 1 - Routage dynamique RIP - Protocole à vecteur de distance + Belman Ford
 
-RIP est un protocole qui permet de router dynamiquement son réseau, c'est à dire faire transiter les informations de routages à travers les routeurs. Il utilise un protocole à vecteur de distance.
+RIP est un protocole qui permet de router dynamiquement son réseau, c'est à dire faire transiter les informations de routages à travers les routeurs. 
 
 On retrouve **RIP** et **IGRP** comme étant représentatifs. 
 
@@ -89,9 +89,8 @@ Il est disponible en trois versions :
 - RIPng : Support IPV6, authentification IPSEC, multicast FF02::9, UDP 521
 
 **Mises à jour RIP**
-- Les mises à jour s'effectuent de routeurs en routeurs
-- Les mises à jour s'effectuent périodiquement, toutes les trente secondes.
-- MAJ consistent à envoyer les tables de **routages entières**
+Les mises à jours s'éffectuent de routeurs en routeurs périodiquement (toutes les trente secondes).
+Le principe consiste à envoyer les tables de routages **entières**
 - MAJ envoyés à l'adresse de diffusion 255.255.255.555 en RIPv1
 - MAJ envoyés à l'adresse de Multicast 224.0.0.6 en RIPv2
 
@@ -105,7 +104,7 @@ RIP utilise l'algorithme de Bellman Fort pour calculer les meilleures routes.
 
 **Vecteur de distance**
 
-https://www.lucidchart.com/publicSegments/view/8fc33029-8b59-45d3-8e5a-71b1c4ada82a/image.png
+![](https://www.lucidchart.com/publicSegments/view/8fc33029-8b59-45d3-8e5a-71b1c4ada82a/image.png)
 
 Dans cet exemple, chacun ajoute une distance de +1 , et donc la métrique s'implémente.
 
@@ -115,7 +114,7 @@ Une boucle de routage est une route pour que les paquets **n'arrivent jamais à 
 
 *Un routeur éloigné fait croire à des routeurs (bien informés d'une route modifiée) qu'il dispose d'une nouvelle route (à coût plus élevé) vers ce réseau.*
 
-Solutions aux boucles de routages :
+**Solutions aux boucles de routages :**
 - Définir un nombre maximum de saut (15 max) ou métrique infinie (16)
 - Route poisoning : Lorsqu'une rouse tombe, le réseau doit-être immédiatement averti d'une métrique de distance infinie (le maximum de sauts +1), plus aucune incrémentation n'est possible.
 - Split horizon : Split horizon empêche à un routeur d'envoyer des informations (de métrique plus élevée) à travers l'interface de laquelle elle a pris l'information.
@@ -159,16 +158,14 @@ Après avoir retenu qu'une route vers un réseau est tombée, il y a une périod
 https://cisco.goffinet.org/routage-dynamique-ripv2/
 
 - 1 : Configurer les interface Gigabit vers les autres routeurs avec une IP et les activer 
-- 2 : Compléments de  configuration
-	- ip dhcp pool [NomLan]
-	- network @ip masque
-	- default-router [sa propre @IP]
-
-- 3 :  Configurer RIP 
+- 2 :  
 	- router rip: Accéder au mode de config de RIP
 	- version 2
-	- network [sa propre @IP] : Fait de la pub & annonces pour segments réseau concernés, active la capacité des interfaces à envoyer des MAJ.
-	- passive-interface [Interface relié à la LAN] : Désactive l'envoi de messages de routages, l'interfac epeut toujours en accepter de manière crédule.
+	- network [@IP des R@ connectés] : Fait de la pub pour segments réseau concernés, active la capacité des interfaces à envoyer des MAJ vers ce réseau.
+- 3 : Compléments de  configuration
+	- ip dhcp pool [NomLan]
+	- default-router [@IP du R@]
+	- passive-interface [Interface relié à la LAN] : Désactive l'envoi de messages de routages, l’interface peut toujours en accepter de manière crédule. Il est conseillé de mettre en passive toute celles qui relient vers de LAN pour éviter de se "noyer".
 
 **Vérifier sa config**
 
@@ -177,5 +174,51 @@ debug ip rip -> lance les logs RIP dans la console par défaut
 show ip route
 ping / traceroute / tracert
 
+## OSPF - Protocole à état de lien - Dijstra
 
+Open Shortest Path First est un protocole qui a été développé par l'IETF pour le **routage intérieur** (IGP, Internal Gateway Protocol).
+Il utilise un protocole à algorithme à état de lien, plus efficace que RIP.
+
+Au lieu d'envoyer des MAJ entière lors d'un changement topologique, OSPF envoie des mises à jour incrémentielles.
+Il utilise la notion d'area (zone) pour désigner un groupe de routeurs, très pratique pour séparer plusieurs zones.
+On parle de communication inter-area lorsqu'on souhaite communiquer avec une autre zone.
+
+Compatible avec le VLSM et la  "summarization" manuelle des routes. 
+
+Un routeur OSPF remplit un rôle et une responsabilité particulière qui dépend de la hiérarchie OSPF établie :
+ - **Internal Routeur (IR) :**
+Ce type de routeur doit entrenir sa BDD d'états de liens (qui est identique sur chaque IR).
+- **Backbone Router (BR) :** Un BR est un routeur qui est connecté dans la zone 0 (Backbone area), la zone de base.
+ - **Area Border Router (ABR) :** 
+L'ABR est un routeur qui connecte au moins deux zones (dont l'area 0). Il possèdent autant de liens qu'il y a d'interface connectés aux différentes zones, regroupe les bases des données des zones et les "summarize" et une seule route IP. Ces "summarize" peuvent ensuite être distribué. C'est un système qui permet de réduire la taille des MAJ.
+- **Autonomous System Boundary Router (ASBR) : **
+Comme OSPF est un protocole interne, il va devoir être connecté au reste de l'internet par d'autres AS.
+Ce type de routeur fera passerelle vers un ou plusieurs AS.
+
+![](https://www.lucidchart.com/publicSegments/view/8e4d2147-50b0-4afc-9d42-6f7ac8dd082c/image.png)
+
+
+**Fonctionnement d'une zone :**
+Pour chaque area, on a une table à état de lien qui est construite et maintenue. A partir de cette BDD, on construit une table de routage grâce à l'algorithme de routage SPF :
+- **Etape 1 : Découverte des voisins :** Un routeur doit trouver ses voisins à l'aide de paquets "Hello", dès son initialisation ou à la suite d'un changement dans la topologie, un router va générer un link-state advertismement (LSA) qui va collecter tous les états de liens de voisinage du routeur.
+- **Etape 2 : Innondations & mises à jour :** 
+Les états de liens vont se faire par innondation. Chaque routeur qui reçoit une MAJ (link-state update) en garde une copie dans sa BDD et le propage auprès des autres routeurs.
+- **Etape 3 : Calul des routes :**
+A l'aide des informations de la BDD, chacun va calculer l'arbre du chemin le plus court (Shortest Path tree) vers toutes les destinations à l'aide de l'algorithme de Dijkstra, se faisant, il crée une table de routage en choisissant les meilleurs routes à inscrire.
+- **Etape 4 : maintenance des routes :**
+Si pas de modifications, très discret, sinon échange d'information par paquets d'états de lien, et l'algorithme de Dijkstra recalculera les chemins les plus courts à inscrire dans la table de routage.
+
+**Qu'est ce qu'un Etat de lien ?**
+Un lien peut-être considéré comme l'interface d'un routeur. Son état est donc la description de cette interface et la relation qu'elle entretient avec ses voisins. On retrouve donc son @IP, masque, type de R@, routeurs connectés.... L'ensemble de ces états de liens forment la "link-state database", identique sur tous les routeurs d'une area.
+
+
+*Exemple état de lien :*
+
+![](https://cisco.goffinet.org/content/images/ospf-lsa-1.png)
+
+
+
+------
+**La distance administrative** est le poids administratif d'une route apprise par un protocole de rouage. Plus elle est faible, plus elle est préférée.
+Les distances administratives ont une valeur par défaut. Des protocoles seront préférés à d'autres, par exemple EIGRP sera préféré à RIP, statique préférée à dynamique.
 
