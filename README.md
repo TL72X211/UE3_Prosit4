@@ -174,7 +174,7 @@ debug ip rip -> lance les logs RIP dans la console par défaut
 show ip route
 ping / traceroute / tracert
 
-## OSPF - Protocole à état de lien - Dijstra
+## OSPF - Protocole à état de lien - Dikjstra
 
 Open Shortest Path First est un protocole qui a été développé par l'IETF pour le **routage intérieur** (IGP, Internal Gateway Protocol).
 Il utilise un protocole à algorithme à état de lien, plus efficace que RIP.
@@ -221,4 +221,81 @@ Un lien peut-être considéré comme l'interface d'un routeur. Son état est don
 ------
 **La distance administrative** est le poids administratif d'une route apprise par un protocole de rouage. Plus elle est faible, plus elle est préférée.
 Les distances administratives ont une valeur par défaut. Des protocoles seront préférés à d'autres, par exemple EIGRP sera préféré à RIP, statique préférée à dynamique.
+
+----
+
+
+## EIGRP- Protocole à vecteur de distance avancé -DUAL
+
+EIGRP (Enhanced Interior Gateway Routing Protocol) est développé par Cisco.
+Il reprend les fondamentaux de l'OSPF qui est un "link state protocol", il fonctionne sur base d'un numéro de système autonome "Autonomous System Number" (ASN) pour dire qu'il pourra communiquer uniquement avec les routeurs qui ont le même ASN.
+
+Lors de son activation, tout comme l'OSPF, il va découvrir ses voisins à l'aide des messages "Hello".
+Lorsque deux routeurs reçoivent des "Hello" 'un de l'autre pour déterminer si ils deviennent voisins EIGRP :
+- Fonctionner dans le même AS (Autonomous System)
+- Correctement configurés pour communiquer
+- Même subnet
+- Pas être interface "passive"
+- Les calcul métriques doivent correspondre (logique)
+- Si l'authentification EIGRP est configuré, elle doit passer avec succès
+
+SI la liason est effectuée, les deux routeurs se définissent comme voisin, et ajoutent cette relation dans leur table de voisinages et commencent à échanger. La première fois, la totalité des routes connues seront envoysé pour lesquelles il y'a une interface **active et configurée** dans EIGRP. Par la suite, ce ne sera que les modifs.
+
+\\!/ Le routeurs s'échangent de manière régulières "Hello" et ont une durée de vie. Si avant la fin de la durée de vie, un des routeur n'a pas reçu de "Hello", le routeur voisin est considéré comme "défaillant".
+La table de routage est mise à jour, retirant toutes les routes reçues par ce voisin.
+
+
+**Calcul de la métrique**
+
+Pour chacune des tables, EIGRP calcule la métrique en tenant compte de la bande passante et du délai des interfaces.
+
+*Métrique = ( ( 10.000.000 / PPBP ) + S[délais] ) x 256*
+
+- *PPBP : Plus petite bande passante vers le subnet en kbits/s*
+- *S[délais]: Somme des délais des interfaces vers le subnet exprimé en 10µs (dizaine de micro s)*
+
+
+**Mises à jour de la table de routage**
+
+**FD (Feasible Distance) :** métrique pour un subnet du point de vue du routeur.
+
+**RD (Reported Distance) :** est la métrique pour un subnet du point de vue du routeur voisin (annoncée par le routeur voisin)
+
+Lorsque deux routeur s'échangent leur topologie, ils échangent des messages de type "update", contenant plusieurs informations :
+- Subnet concerné
+- Délai
+- Bande passante
+- Charge de l'interface
+- Fiabilité de l'interface
+- MTU
+- Nombre de sauts
+
+Le récepteur l'intègre dans sa table de topologie et ensuite calcule la RD du subnet et la FD pour ce subnet.
+
+
+![](https://www.ciscomadesimple.be/wp-content/uploads/2010/03/eigrp-updt.png)
+
+**Successor et Feasible Successor**
+
+La particularité de l'EIGRP c'est qu'il conserve dans sa BDD toutes les infos de ses voisins, y compris celles qui n'ont pas étés intégrée.
+
+Quand plusieurs routes existent, le "Successor" est la route qui a la plus petite métrique vers le subnet, et donc qui a la plus petite "Feasible Distance". Par défaut, cette route sera alors le "next-hop"
+
+Dans certaines conditions, des routes peuvent-être considérés comme "valides" sans pour autant être les meilleurs, c'est ce qu'on appelle les "Feasible Successors". Si le Successor devait tomber, EIGRP irait chercher une alternative dans les Feasible.
+
+**GESTION DES ACCIDENTS RÉSEAU**
+
+1 - EIGRP analyse sa topologie, si un ou plusieurs Feasible existent, il remplace la route par celle parmis les FS ayant la plus petite FD
+
+2 - Si EIGRP n'a pas de FS dans sa topologie, il entre dans un processus de "requête", i envoi des requêtes à ses voisins à la recherche d'une nouvelle route vers le subnet perdu. Si pas de solutions de la part des voisins, les voisins demandent au voisin...
+
+**CONFIGURATION** 
+
+
+
+
+
+
+
+
 
