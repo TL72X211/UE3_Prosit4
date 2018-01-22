@@ -9,19 +9,19 @@
 
 ## Mots-Clés
  * Congestion : Embouteillage
- * Algorithme de Dijkstra : 
- * Routage Dynamique : 
- * Théorie des graphs : 
- * Algorithme distribué (à état de lien) : 
- * Protocole RIP : 
- * Protocole Propriétaire : 
- * Protocole Ouvert : 
- * Algorithme de type vercteur de distance : 
- * Matrice : 
- * Authentification : 
- * Coût : 
- * Nombre de saut : 
- * Arretes et sommets : 
+ * Algorithme de Dijkstra : /
+ * Routage Dynamique : /
+ * Théorie des graphs : /
+ * Algorithme distribué (à état de lien) : /
+ * Protocole RIP : /
+ * Protocole Propriétaire : Protocole privé 
+ * Protocole Ouvert :  Protocole disponible à tous 
+ * Algorithme de type vercteur de distance : /
+ * Matrice : /
+ * Authentification : /
+ * Coût : /
+ * Nombre de saut : Nombre de routeurs à parcourir avant d'arriver à destination 
+ * Arretes et sommets : Arrête = Liaison, sommets = intersection d'arrête
 
 ## Contexte
 ### Quoi ?
@@ -314,8 +314,7 @@ Cet algorithme est de complexité polynomiale.
 -> On fait un tableau avec toute les villes & étapes à la fin
 -> voir vidéo pour tuto
 
-##IMAGE A INSERER
-
+![](https://github.com/TL72X211/UE3_Prosit4/blob/Emilien/Dijkstra.PNG)
 
 
 
