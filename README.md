@@ -174,7 +174,7 @@ debug ip rip -> lance les logs RIP dans la console par défaut
 show ip route
 ping / traceroute / tracert
 
-## OSPF - Protocole à état de lien - Dikjstra
+## 2- OSPF - Protocole à état de lien - Dikjstra
 
 Open Shortest Path First est un protocole qui a été développé par l'IETF pour le **routage intérieur** (IGP, Internal Gateway Protocol).
 Il utilise un protocole à algorithme à état de lien, plus efficace que RIP.
@@ -225,7 +225,7 @@ Les distances administratives ont une valeur par défaut. Des protocoles seront 
 ----
 
 
-## EIGRP- Protocole à vecteur de distance avancé -DUAL
+## 3 - EIGRP- Protocole à vecteur de distance avancé -DUAL
 
 EIGRP (Enhanced Interior Gateway Routing Protocol) est développé par Cisco.
 Il reprend les fondamentaux de l'OSPF qui est un "link state protocol", il fonctionne sur base d'un numéro de système autonome "Autonomous System Number" (ASN) pour dire qu'il pourra communiquer uniquement avec les routeurs qui ont le même ASN.
@@ -290,6 +290,33 @@ Dans certaines conditions, des routes peuvent-être considérés comme "valides"
 2 - Si EIGRP n'a pas de FS dans sa topologie, il entre dans un processus de "requête", i envoi des requêtes à ses voisins à la recherche d'une nouvelle route vers le subnet perdu. Si pas de solutions de la part des voisins, les voisins demandent au voisin...
 
 **CONFIGURATION** 
+/
+
+## Synthèse mathématique :
+
+**Bellman Ford** (RIP)
+
+Calcul des plus courts chemins depuis un sommet source donné dans un graphe orienté pondéré.
+Autorise la présence de certains arcs de poids négatif et permet de détecter l'existence d'un circuit absorbant, c'est-à-dire de poids total strictement négatif, accessible depuis le sommet source.
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Directed_graph_no_background.svg/220px-Directed_graph_no_background.svg.png)
+*Graphe orienté pondéré*
+
+https://fr.wikipedia.org/wiki/Algorithme_de_Bellman-Ford
+
+
+**Dijkstra**(OSPF)
+sert à résoudre le problème du plus court chemin.
+Il calcule des plus courts chemins à partir d'une source dans un graphe orienté pondéré par des réels positifs. On peut aussi l'utiliser pour calculer un plus court chemin entre un sommet de départ et un sommet d'arrivée.
+
+Cet algorithme est de complexité polynomiale.
+
+-> On fait un tableau avec toute les villes & étapes à la fin
+-> voir vidéo pour tuto
+
+##IMAGE A INSERER
+
+
 
 
 
