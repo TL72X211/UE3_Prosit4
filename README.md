@@ -184,7 +184,35 @@ OSPF est un IGP (Interior Gateway Protocol), autrement dit il devra être connec
 	
 ![](picsNico/ospf.png)
 
+paquets OSPF: ils ont un TTL de 1,. Les paquets ont une taille max de 65535 octets , il existe 5 paquets OSPF:
 
+* hello (type 1)
+	découverte des voisins, maintien des adjacences
+* Database Descritpion (DBD, type 2)
+	description des LSA
+* Link State Request (type 3)
+	requête d'un LSA
+* Link State Update (type 4)
+	mise à jour d'un LSA
+* Link State Acknowledgement (tpe 5)
+	acquittement d'un LSA
+
+Les Paquets LSA sont un sous-type de paquet LSU, les types suivants sont définis :
+
+* Type 1 (router) 
+diffusé par un routeur, décrit l'état de ses interfaces ;
+* Type 2 (network) 
+diffusé par un DR (Designated Router), décrit les routeurs attachés à un sous-réseau ;
+* Type 3 (summary) 
+résumé de route par un ABR ;
+* Type 4 (interarea summary) 
+route vers l'ASBR, généré par un ABR ;
+* Type 5 (external) 
+diffusé par un ASBR, décrit une route externe ;
+* Type 6 (multicast group membership) 
+utilisé par MOSPF ;
+* Type 7 (external NSSA) 
+route externe générée par un ASBR d'un NSSA.
 
 config : 
 
@@ -195,10 +223,12 @@ config :
 
 masque inverse : on fait un NOT avec chaque bit du masque, 255.255.255.0 devient 0.0.0.255
 
-####**EIGPR**
+Son principal concurrent sur les infrastructures homogènes d'entreprises est EIGRP
+
+#### **EIGPR**
 
 Enhanced Interior Gateway Routing Protocol: protocole de routage dev par Cisco. Type distance vector avancé
-Son fonctionnement global ressemble à un protocole distance vector il dispose de caractéristiques que l'on retrouve dans OPF tel que l établisement de relations d'adjacence
+Son fonctionnement global ressemble à un protocole distance vector il dispose de caractéristiques que l'on retrouve dans OSPF tel que l établisement de relations d'adjacence
 
 caractéristiques:
 
@@ -233,20 +263,31 @@ Un fois une relation établie le router envoye la totalité de ses routes pour l
 
 Les routeurs s'échangent en permanence des hello pour s'assurer de la connexion
 
-chaque routeur garde en mémoire les infos envoyées par les autres routeurs, il utilise ensuite DUAL pour déterminer la meilleur route pour chauqe sous réseau, calcule la métrique et y associe le résultat dnas sa table de routage.
+chaque routeur garde en mémoire les infos envoyées par les autres routeurs, il utilise ensuite DUAL pour déterminer la meilleur route pour chaque sous réseau, calcule la métrique et y associe le résultat dans sa table de routage.
 
-###**Métriques utilisés pour évaluer les routes**
+métrique d'eigrp: utilise le délai, la bande passante, la fiabilité et la charge
+
+m = 256*(K1+BP+(K2*BP)/(256-charge)+K3* Delai).K5/(fiabilité +K4)
+
+### **Métriques utilisés pour évaluer les routes**
 
 * hops, nombre de sauts : nombre de saut IP nécessaires pour atteindre le réseau de destination, utilisé par RIP
 * cost, coût numérique dépendant de la bande passante des liens franchis, utilisé par OSPF
 * calcul complexe tenant compte du délai, de la charge, du MTU et/ou d'autres paramètres
 
-###**Théorie des graphes :**
+### **Théorie des graphes :**
 
 
-####**Dijkstra**
-###**Implémentation des protocoles chez Cisco**
-###**Distances administratives**
+#### **Dijkstra**
+
+[explication](https://www.youtube.com/watch?v=GazC3A4OQTE)
+[did it](https://github.com/NHURTEVENT/Dijkstra)
+
+### **Implémentation des protocoles chez Cisco**
+
+cf les différentes commandes dans chaque partie
+
+### **Distances administratives**
 
 le poids administratif d'une route apprise par un protocole de routage, on préfère la route ayant la plus faible peu importe la méthode de routage.
 
@@ -262,7 +303,7 @@ valeurs par défaut:
 * Int-BGP	200
 * Inconnu	255
 
-Son principal concurrent sur les infrastructures homogènes d'entreprises est EIGRP
+
 
 
 
@@ -270,4 +311,4 @@ Son principal concurrent sur les infrastructures homogènes d'entreprises est EI
  * Matrice pour trouver le meilleur chemin
  * Workshop
  * Corbeille (*Avec Kim*)
- * *Facultatif : Dijkstra en Java*
+ * [*Facultatif : Dijkstra en Java*](https://github.com/NHURTEVENT/Dijkstra)
