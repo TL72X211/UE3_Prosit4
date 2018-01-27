@@ -59,7 +59,7 @@
  * Dijkstra fait la sommes des poids des arretes et continu à avancer d'arrete en arrete tant que le poids des arretes parcourues est inférieure au poids total des poids des arretes précédentes
 
 # Plan d'Action
-##Etudes
+## Etudes
 
 ### Routage dynamique
 
@@ -72,16 +72,16 @@ Il existe 3 grands types de protocoles de routages dynamique :
 
 ### Protocole dynamique 
 
-####RIP :
+#### RIP :
 RIP transmet à ses voisins les adresses réseaux qu’il connait ainsi que les distances pour y accéder. Le couple d’adresse/distance est appelé « Vecteur de distance". Il diffuse les routes toutes les 30s. Il limite le nbre de sauts à 15 pour éviter que les routes bouclent. Il existe 2 versions (RIPv1 et RIPv2)
 
-####OSPF :
+#### OSPF :
 Le protocole OSPF fonctionne dans une délimitation d’un réseau nommé « aire ». Tous les routeurs d’un réseau envoient des messages « hello » à leurs voisins immédiats à intervalle régulier. En réponse, chaque routeurs voisins revoient un message « Link-state advertissement » (LSA). Tout les LSA forment une base de données nommée « LSDB ». Le routeur utilise ensuite l’algorithme de Dijkstra pour calculer la route la plus rapide.
 
-####IGRP :
+#### IGRP :
 C’est un protocole propriétaire CISCO. Il a été utilisé pour remplacer le protocole RIP. Il permet aux routeurs de s’échanger les tables de routages. Le nombre maximal de sauts (hops) est de 255.
 
-####EIGRP :
+#### EIGRP :
 Il est aussi un protocole de routage propriétaire CISCO. Il est l’amélioration du protocole IGRP. Ses optimisations sont basées sur l’algorithme « Diffusing Update Algorithm (DUAL) » qui garanti l’absence de boucles en garantissant les « sauts à l’infini ».
 EIGRP calcule les métriques sur base de 4 paramètres combinés à 5 coefficients : le délai, la bande passante, la fiabilité, la charge.
 
@@ -112,7 +112,7 @@ On peut, par exemple s’en servir dans un graphe où les villes sont représent
 On l’utilise en informatique pour les protocoles de routage à état de liens comme OSPF (Open Shortest Path First) ou IS-IS.
 
 ### Implémentation des protocoles chez Cisco
-####OSPF :
+#### OSPF :
 Configuration :
 R1(config)#router ospf 100					(Création du num de processus)
 R1(config-router)#network 10.0.3.0 0.0.0.255 area 0		(Ajout des réseaux distants)
@@ -134,20 +134,20 @@ R1(config-if)#ip ospf message-digest-key 1 md5 passworD
 R1(config-if)#int fa 2/0
 R1(config-if)#ip ospf message-digest-key 1 md5 passworD
 
-####IGRP :
+#### IGRP :
 R1(config)#router igrp 100					(Numéro de processus)
 R1(config-router)#network 10.0.0.0				(Ajout des réseaux connectés) 
 R1(config-router)#network 20.0.0.0				(Ajout des réseaux connectés) 
 R1(config-router)#exit
 
-####EIGRP :
+#### EIGRP :
 R1(config)#router eigrp 1					(Numéro de processus)
 R1(config-router)#network 10.0.0.0 0.0.0.255			(Ajout des réseaux connectés)
 R1#show ip eigrp neighbors					(Information des voisins)
 
 
 
-###Etudier les distances administratives :
+### Etudier les distances administratives :
 
 « Distance administrative (AD) : identifie la fiabilité de la source de la route. L’AD pour les routes statiques équivaut à 1 et pour les routes connectées, elle équivaut à 0. Les protocoles de routage dynamique disposent d’une AD supérieure à 1 selon le protocole. » CCNA2 chapitre 3
 
@@ -167,7 +167,7 @@ R1#show ip eigrp neighbors					(Information des voisins)
 
 Si la distance administrative est de 255, le routeur ne croit pas à la source de ce routage et n'installe pas le routage dans la table de routage
 
-##Réalisation
+## Réalisation
  * Matrice pour trouver le meilleur chemin
  * Workshop
  * Corbeille (*Avec Kim*)
