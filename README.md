@@ -1,4 +1,4 @@
-# UE3_Prosit4 - Graphes et algorithmes de routage
+﻿# UE3_Prosit4 - Graphes et algorithmes de routage
 
 ## TO DO
   * Faire matrice d'adjacence du graphe du prosit
@@ -58,36 +58,98 @@
  * Parcours en profondeur
  * Dijkstra fait la sommes des poids des arretes et continu à avancer d'arrete en arrete tant que le poids des arretes parcourues est inférieure au poids total des poids des arretes précédentes
 
-## Plan d'Action
-### Etudes
- * Routage dynamique
+# Plan d'Action
+##Etudes
 
- * Protocole dynamique (RIP, OSPF, IGRP, EIGRP) (Gilly + Emilien)
- 	 * RIP : Message toutes les 30s, 15 sauts max, en v1 envoie en broadcast, en v2 envoie en multicast. Si pas de nouvelle, la route est placée avec une métrique infinie, si encore trop longtemps inactif alors "flush" et retiré de la table de routage. Limites : Consomme beaucoup de bande passante, pas de zone ni de frontière, est sensible aux boucles de routage (quand un message n'arrive jamais à destination). Converge lentement car tables envoyées toutes les 30 secondes.
+### Routage dynamique
 
- 	 * OSPF : Aire, envoi de message "Hello". Routage intérieur, envoi de màj incrémentielle. Les routeurs se groupes dans des zones (area).  - BR - ABR - ASBR.  
- 	 Envoi de message Hello ; Puis envoi de message DBA (DataBase) ; Les routeurs répondent avec leur base de donnée ; Le routeur demande les bouts qui lui manque (LSR) ; "Voila la donnée" (LSU) ; "J'ai bien reçu" (LSA). Pour plus de détails, voir WIKI.  
- 	 S'appuie sur l'algo de Dijkstra.  
- 	 Formule du calcul du métrique : (10 000 000 / plusPetiteBandePassante) + Somme(Délais)\*256  
- 	 Si problème sur le réseau, le routeur remplace par la feasable distance ayant la plus petite métrique. Si il n'y en a pas, il rentre dans un processus de requête pour rechercher une nouvelle route.
+L’idée du routage dynamique est de ne plus laisser la configuration du routage à un individu mais aux routeurs. Le problème du routage fait a la main par un individu est le temps de réaction élevé ainsi que le propension aux erreurs.
+Les routeurs n’ont juste qu’à, à l’aide de protocoles de routage dynamique, identifier à quels réseaux sont connectées ses interfaces puis de notifier les routeurs voisins. 
+Il existe 3 grands types de protocoles de routages dynamique :
+- A état de liens (OSPF, IS-IS)
+- A vecteur de distance (RIP, IGRP)
+- Hybride (EIGRP)
 
- 	 * IGRP : Propriétaire Cisco, 255 sauts max
+### Protocole dynamique 
 
- 	 * EIGRP : Propriétaire Cisco, (l'EIGRP Cisco a une distance admin plus faible de EIGRP normal)
+####RIP :
+RIP transmet à ses voisins les adresses réseaux qu’il connait ainsi que les distances pour y accéder. Le couple d’adresse/distance est appelé « Vecteur de distance". Il diffuse les routes toutes les 30s. Il limite le nbre de sauts à 15 pour éviter que les routes bouclent. Il existe 2 versions (RIPv1 et RIPv2)
 
- * Métriques utilisés pour évaluer les routes
- 	Permet de "choisir" la route la plus courte. Deux types principaux, le nombre de sauts et la bande passante. Les autres sont : Etat des liens, Fiabilité, Charge, Délais ...
+####OSPF :
+Le protocole OSPF fonctionne dans une délimitation d’un réseau nommé « aire ». Tous les routeurs d’un réseau envoient des messages « hello » à leurs voisins immédiats à intervalle régulier. En réponse, chaque routeurs voisins revoient un message « Link-state advertissement » (LSA). Tout les LSA forment une base de données nommée « LSDB ». Le routeur utilise ensuite l’algorithme de Dijkstra pour calculer la route la plus rapide.
 
- * Théorie des graphes :
-	 * Algorithme destribué à l'état de lien : Belman-Ford, Dijkstra, A\*, Floid
+####IGRP :
+C’est un protocole propriétaire CISCO. Il a été utilisé pour remplacer le protocole RIP. Il permet aux routeurs de s’échanger les tables de routages. Le nombre maximal de sauts (hops) est de 255.
 
-	 * Dijkstra
-	 Se base sur toutes les routes possible et cherche la plus courte. Cf [vidéo](https://www.youtube.com/watch?time_continue=2&v=rHylCtXtdNs). Plus l'algorithme avance, plus on avance vers le chemin le plus court. Les arrêtes doivent être pondérées (chiffrées) et si elles ne le sont pas, on met 1 sur toutes les arrêtes. Algo BFS est le plus simple, si on a des poids égaux sur chaque arrête ou pas de poids du tout.
+####EIGRP :
+Il est aussi un protocole de routage propriétaire CISCO. Il est l’amélioration du protocole IGRP. Ses optimisations sont basées sur l’algorithme « Diffusing Update Algorithm (DUAL) » qui garanti l’absence de boucles en garantissant les « sauts à l’infini ».
+EIGRP calcule les métriques sur base de 4 paramètres combinés à 5 coefficients : le délai, la bande passante, la fiabilité, la charge.
 
- * Implémentation des protocoles chez Cisco
- 	Voir Workshop
+### Métriques utilisés pour évaluer les routes
 
- * Distances administratives
+« Métrique : indique la valeur attribuée pour atteindre le réseau distant. Les valeurs les plus faibles indiquent les routes préférées. La mesure pour les routes statiques et les routes connectées est de 0. » CCNA2 chapitre 3
+
+La métrique peut correspondre :
+   	- Au nombre de sauts IP nécessaires pour atteindre le réseau destination, comme dans RIP ;
+    	- A un coût numérique qui dépend de la bande passante des liens franchis, comme dans OSPF ;
+    	- Au résultat d'un calcul plus complexe, qui tient compte de la charge, du délai, du MTU, etc.
+
+### Théorie des graphes :
+	
+### Algorithme distribué à l'état de lien
+
+Algorithme de Bellma 
+
+Algorithme de Floyd-Warshall n-Ford
+
+Algorithme A*
+
+
+### Etudier Dijkstra
+
+Dijkstra est un algorithme de calcul de chemin le plus court. Il est utilisé dans un graphe non orienté avec un sommet de départ et d’arrivé ainsi que des arrêtes pondérées avec des réels positifs. Il est basé sur un parcours en largeur.
+On peut, par exemple s’en servir dans un graphe où les villes sont représentées par des sommets et les routes par les arrêtes pour calculer le chemin le plus court entre la ville A et la ville B. Il est souvent utilisé dans les calculs des itinéraires routiers pour calculer le chemin le plus court en fonction de la distance, de la consommation de carburant etc…
+On l’utilise en informatique pour les protocoles de routage à état de liens comme OSPF (Open Shortest Path First) ou IS-IS.
+
+### Implémentation des protocoles chez Cisco
+####OSPF :
+Configuration :
+R1(config)#router ospf 100					(Création du num de processus)
+R1(config-router)#network 10.0.3.0 0.0.0.255 area 0		(Ajout des réseaux distants)
+R1(config-router)#network 10.0.0.0 0.0.0.255 area 0		(Ajout des réseaux distants)
+R2(config-router)#redistribute connected			(Redistribution des routes connectés)
+Ou
+R1(config-router)#default-information originate		(Redistribution d'une route par défaut)
+
+R1#show ip ospf						(Informations concernant ospf)
+R1#show ip ospf neighbor					(Afficher les voisins ospf)
+
+Authentication:
+
+R1(config)#router ospf 100
+R1(config-router)#area 0 authentication message-digest
+R1(config-router)#exit
+R1(config)#int fa 1/0
+R1(config-if)#ip ospf message-digest-key 1 md5 passworD
+R1(config-if)#int fa 2/0
+R1(config-if)#ip ospf message-digest-key 1 md5 passworD
+
+####IGRP :
+R1(config)#router igrp 100					(Numéro de processus)
+R1(config-router)#network 10.0.0.0				(Ajout des réseaux connectés) 
+R1(config-router)#network 20.0.0.0				(Ajout des réseaux connectés) 
+R1(config-router)#exit
+
+####EIGRP :
+R1(config)#router eigrp 1					(Numéro de processus)
+R1(config-router)#network 10.0.0.0 0.0.0.255			(Ajout des réseaux connectés)
+R1#show ip eigrp neighbors					(Information des voisins)
+
+
+
+###Etudier les distances administratives :
+
+« Distance administrative (AD) : identifie la fiabilité de la source de la route. L’AD pour les routes statiques équivaut à 1 et pour les routes connectées, elle équivaut à 0. Les protocoles de routage dynamique disposent d’une AD supérieure à 1 selon le protocole. » CCNA2 chapitre 3
 
  	 * Connected : 0
  	 * Statique : 1
@@ -103,7 +165,9 @@
  	 * BGP : 200
  	 * Inconnu : 250
 
-### Réalisation
+Si la distance administrative est de 255, le routeur ne croit pas à la source de ce routage et n'installe pas le routage dans la table de routage
+
+##Réalisation
  * Matrice pour trouver le meilleur chemin
  * Workshop
  * Corbeille (*Avec Kim*)
